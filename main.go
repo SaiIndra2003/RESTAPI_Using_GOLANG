@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,7 +20,16 @@ func getTodos(context *gin.Context){ //gin.context contains information regardin
 	context.IndentedJSON(http.StatusOK,todos) // converts our slice to json using the indentaions we definedd at struct
 }
 
+func addTodo(context *gin.Context){
+	var newTodo todo 
+	err := context.BindJSON(&newTodo)
+	if err != nil{
+		return
+	}
+	todos = append(todos, newTodo)
+	context.IndentedJSON(http.StatusCreated,newTodo)
 
+}
 
 
 func main(){
@@ -32,6 +42,7 @@ func main(){
 	router := gin.Default()
 
 	router.GET("/todos",getTodos)
+	router.POST("/todos",addTodo)
 
 	router.Run("localhost:8080")
 }

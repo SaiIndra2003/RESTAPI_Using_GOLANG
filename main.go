@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -28,9 +29,30 @@ func addTodo(context *gin.Context){
 	}
 	todos = append(todos, newTodo)
 	context.IndentedJSON(http.StatusCreated,newTodo)
-
 }
 
+
+func getTodo(context *gin.Context){
+	id := context.Param("id")
+	
+	todo, err := getTodoById(id)
+	if err == nil{
+		context.IndentedJSON(http.StatusOK,todo)
+		return
+	} else {
+		context.IndentedJSON(http.StatusNotFound,gin.H{"message":"Todo not Found"})
+		return
+	}
+}
+	
+func getTodoById(id string)(*todo, error){
+		for i, t := range todos{
+			if t.ID == id{
+				return &todos[i], nil
+			}
+		}
+		return nil, errors.New("todo not found")
+}
 
 func main(){
 	todos = append(todos,todo{"1","Clean Room",false})
@@ -43,6 +65,7 @@ func main(){
 
 	router.GET("/todos",getTodos)
 	router.POST("/todos",addTodo)
+	router.GET("/todos/:id",getTodo)
 
 	router.Run("localhost:8080")
 }
